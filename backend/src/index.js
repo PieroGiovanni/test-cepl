@@ -5,7 +5,15 @@ import cors from "cors";
 const app = express();
 
 const main = async () => {
-  app.use(cors({ credentials: true, origin: process.env.FRONTEND_URL }));
+  app.use(
+    cors({
+      credentials: true,
+      origin: [
+        "http://localhost:5173",
+        "https://test-cepl-28409.firebaseapp.com",
+      ],
+    })
+  );
 
   app.use(express.json());
 

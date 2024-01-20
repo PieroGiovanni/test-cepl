@@ -4,7 +4,7 @@ import {
   getTestData,
   initializeFirebaseApp,
   updateTestData,
-} from "../lib/firebase.js";
+} from "./lib/firebase.js";
 
 const app = express();
 
@@ -14,7 +14,7 @@ const main = async () => {
   // updateTestData();
 
   app.listen(process.env.PORT);
-  console.log(`Servidor en puerto ${process.env.PORT}`);
+  console.log(`Server running on port ${process.env.PORT}`);
 };
 
 main().catch((e) => console.log(e));

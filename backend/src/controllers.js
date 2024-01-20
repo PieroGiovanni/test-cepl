@@ -1,5 +1,7 @@
-import { addDoc, collection, doc, getDoc, setDoc } from "firebase/firestore";
-import { firebaseDb } from "./lib/firebase.js";
+// import { addDoc, collection, doc, getDoc, setDoc } from "firebase/firestore";
+import { firebaseDb as db } from "./lib/firebase.js";
+
+export const userRef = db.collection("user-transactions");
 
 export const makeDeposit = async (req, res, next) => {
   //   const uid = req.res.user.uid;
@@ -8,92 +10,98 @@ export const makeDeposit = async (req, res, next) => {
   let balance = 0;
 
   try {
-    const userDocRef = doc(firebaseDb, "user-transactions", uid);
+    const docSnap = await db
+      .collection("user-transactions", uid)
+      .doc(uid)
+      .get();
 
-    const docSnap = await getDoc(userDocRef);
-
-    if (docSnap.exists()) {
+    if (docSnap.exists) {
       balance = docSnap.data().balance;
     }
 
-    const transactionDocRef = await addDoc(
-      collection(firebaseDb, "user-transactions", uid, "transaction"),
-      {
-        type: "DEPOSIT",
-        quantity: quantity,
-      }
-    );
+    const newTransaction = await db
+      .collection("user-transactions")
+      .doc(uid)
+      .collection("transaction")
+      .add({
+        type: "DEPOSIT2",
+        quantity,
+      });
 
-    await setDoc(doc(firebaseDb, "user-transactions", uid), {
-      balance: balance + quantity,
-    });
-    console.log("Transacción completada, ID: ", transactionDocRef.id);
+    if (newTransaction)
+      await db
+        .collection("user-transactions")
+        .doc(uid)
+        .set({
+          balance: balance + quantity,
+        });
 
-    res.status(200).json({
-      message: "Transacción completada, ID: " + transactionDocRef.id,
+    return res.status(200).json({
+      message: "Depósito exitoso",
     });
   } catch (error) {
-    console.error("Error adding document: ", error);
+    return console.error("Error adding document: ", error);
   }
 };
 
 export const makeWithdrawal = async (req, res, next) => {
-  //   const uid = req.res.user.uid;
   const uid = "USUARIO6";
-  const quantity = 100;
+  const quantity = 200;
   let balance = 0;
 
   try {
-    const userDocRef = doc(firebaseDb, "user-transactions", uid);
+    const docSnap = await db
+      .collection("user-transactions", uid)
+      .doc(uid)
+      .get();
 
-    const docSnap = await getDoc(userDocRef);
-
-    if (docSnap.exists()) {
+    if (docSnap.exists) {
       balance = docSnap.data().balance;
     }
 
     if (balance < quantity)
       return res.status(500).json({ message: "Fondos insuficientes" });
 
-    const transactionDocRef = await addDoc(
-      collection(firebaseDb, "user-transactions", uid, "transaction"),
-      {
-        type: "WITHDRAWAL",
-        quantity: quantity,
-      }
-    );
+    const newTransaction = await db
+      .collection("user-transactions")
+      .doc(uid)
+      .collection("transaction")
+      .add({
+        type: "WITHDRAWAL2",
+        quantity,
+      });
 
-    await setDoc(doc(firebaseDb, "user-transactions", uid), {
-      balance: balance - quantity,
-    });
-    console.log("Transacción completada, ID: ", transactionDocRef.id);
+    if (newTransaction)
+      await db
+        .collection("user-transactions")
+        .doc(uid)
+        .set({
+          balance: balance - quantity,
+        });
 
-    res.status(200).json({
-      message: "Transacción completada, ID: " + transactionDocRef.id,
+    return res.status(200).json({
+      message: "Retiro exitoso",
     });
   } catch (error) {
-    console.error("Error adding document: ", error);
+    return console.error("Error adding document: ", error);
   }
 };
 
 export const getBalance = async (req, res, next) => {
   const uid = "USUARIO6";
-  let balance;
+  let balance = 0;
 
   try {
-    const userDocRef = doc(firebaseDb, "user-transactions", uid);
+    const docSnap = await db
+      .collection("user-transactions", uid)
+      .doc(uid)
+      .get();
 
-    const docSnap = await getDoc(userDocRef);
-
-    if (docSnap.exists()) {
+    if (docSnap.exists) {
       balance = docSnap.data().balance;
-      res.status(200).json({
-        saldo: balance,
-      });
-    } else {
-      console.log("No such document!");
     }
+    return res.json({ balance });
   } catch (error) {
-    console.error("Error adding document: ", error);
+    return console.log(error);
   }
 };

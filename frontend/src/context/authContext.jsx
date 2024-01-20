@@ -22,10 +22,7 @@ export const AuthProvider = ({ children }) => {
   const googleLogin = () => {
     const googleProvider = new GoogleAuthProvider();
     return signInWithPopup(auth, googleProvider)
-      .then((result) => {
-        // const credential = GoogleAuthProvider.credentialFromResult(result);
-        // console.log(credential);
-        // console.log(result.user);
+      .then(async (result) => {
         setUser(result.user);
       })
       .catch((error) => {
@@ -36,12 +33,14 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     signOut(auth)
-      .then(() => console.log("Sign-out successful"))
+      .then(async () => {
+        console.log("Sign-out successful");
+      })
       .catch((error) => console.log(error));
   };
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       setUser(user);
       setLoading(false);
     });

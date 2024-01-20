@@ -1,17 +1,18 @@
 // import { addDoc, collection, doc, getDoc, setDoc } from "firebase/firestore";
+import { Timestamp } from "firebase-admin/firestore";
 import { firebaseDb as db } from "./lib/firebase.js";
 
 export const userRef = db.collection("user-transactions");
 
 export const makeDeposit = async (req, res, next) => {
-  //   const uid = req.res.user.uid;
-  const uid = "USUARIO6";
-  const quantity = 400;
+  const uid = req.uid;
+
+  const { quantity } = req.body;
   let balance = 0;
 
   try {
     const docSnap = await db
-      .collection("user-transactions", uid)
+      .collection("users-transactions", uid)
       .doc(uid)
       .get();
 
@@ -20,12 +21,13 @@ export const makeDeposit = async (req, res, next) => {
     }
 
     const newTransaction = await db
-      .collection("user-transactions")
+      .collection("users-transactions")
       .doc(uid)
-      .collection("transaction")
+      .collection("transactions")
       .add({
-        type: "DEPOSIT2",
+        type: "DEPOSIT",
         quantity,
+        date: Timestamp.fromDate(new Date()),
       });
 
     if (newTransaction)
@@ -45,7 +47,7 @@ export const makeDeposit = async (req, res, next) => {
 };
 
 export const makeWithdrawal = async (req, res, next) => {
-  const uid = "USUARIO6";
+  const uid = req.serId;
   const quantity = 200;
   let balance = 0;
 
@@ -88,7 +90,7 @@ export const makeWithdrawal = async (req, res, next) => {
 };
 
 export const getBalance = async (req, res, next) => {
-  const uid = "USUARIO6";
+  const uid = req.serId;
   let balance = 0;
 
   try {

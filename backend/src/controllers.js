@@ -1,8 +1,7 @@
-// import { addDoc, collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { Timestamp } from "firebase-admin/firestore";
 import { firebaseDb as db } from "./lib/firebase.js";
 
-export const userRef = db.collection("user-transactions");
+export const userRef = db.collection("users-transactions");
 
 export const makeDeposit = async (req, res, next) => {
   const uid = req.uid;
@@ -32,7 +31,7 @@ export const makeDeposit = async (req, res, next) => {
 
     if (newTransaction)
       await db
-        .collection("user-transactions")
+        .collection("users-transactions")
         .doc(uid)
         .set({
           balance: balance + quantity,
@@ -47,13 +46,13 @@ export const makeDeposit = async (req, res, next) => {
 };
 
 export const makeWithdrawal = async (req, res, next) => {
-  const uid = req.serId;
-  const quantity = 200;
+  const uid = req.uid;
+  const { quantity } = req.body;
   let balance = 0;
 
   try {
     const docSnap = await db
-      .collection("user-transactions", uid)
+      .collection("users-transactions", uid)
       .doc(uid)
       .get();
 
@@ -65,17 +64,17 @@ export const makeWithdrawal = async (req, res, next) => {
       return res.status(500).json({ message: "Fondos insuficientes" });
 
     const newTransaction = await db
-      .collection("user-transactions")
+      .collection("users-transactions")
       .doc(uid)
       .collection("transaction")
       .add({
-        type: "WITHDRAWAL2",
+        type: "WITHDRAWAL",
         quantity,
       });
 
     if (newTransaction)
       await db
-        .collection("user-transactions")
+        .collection("users-transactions")
         .doc(uid)
         .set({
           balance: balance - quantity,
@@ -90,12 +89,12 @@ export const makeWithdrawal = async (req, res, next) => {
 };
 
 export const getBalance = async (req, res, next) => {
-  const uid = req.serId;
+  const uid = req.uid;
   let balance = 0;
 
   try {
     const docSnap = await db
-      .collection("user-transactions", uid)
+      .collection("users-transactions", uid)
       .doc(uid)
       .get();
 

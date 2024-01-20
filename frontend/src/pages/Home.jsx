@@ -1,36 +1,56 @@
-import { useState } from "react";
-import { getPing } from "../api/ping";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/authContext";
-import { makeDeposit } from "../api/requests";
+import { getBalance, makeDeposit, makeWithdrawal } from "../api/requests";
 
 function Home() {
-  const [ping, setPing] = useState(null);
+  const [balance, setBalance] = useState(null);
 
   const { logout, user } = useAuth();
+
+  const fetchBalance = useCallback(async () => {
+    const balance = await getBalance(user.accessToken);
+    setBalance(balance.data.balance);
+  }, [user.accessToken]);
+
+  useEffect(() => {
+    fetchBalance();
+  }, [fetchBalance]);
+
   const handleLogout = async () => {
     await logout();
   };
 
-  const handlePing = async () => {
-    const res = await getPing(user.accessToken);
-    setPing(res.data);
-    console.log(res.data);
-  };
-
   const handleDeposit = async () => {
     const res = await makeDeposit(user.accessToken, {
-      quantity: 69,
+      quantity: 100,
     });
 
     console.log(res.data);
+
+    fetchBalance();
+  };
+
+  const handleWithdrawal = async () => {
+    const res = await makeWithdrawal(user.accessToken, {
+      quantity: 100,
+    });
+
+    console.log(res.data);
+
+    fetchBalance();
   };
 
   return (
     <div>
-      Bienvenido {user.displayName}
-      <p>{ping}</p>
-      <button onClick={handlePing}>ping</button>
-      <button onClick={handleDeposit}>deposito de 100</button>
+      {balance ? (
+        <p>
+          Bienvenido {user.displayName}, tienes S/. {balance}
+        </p>
+      ) : (
+        <div>cargando..</div>
+      )}
+      <button onClick={handleDeposit}>depósito de 100</button>
+      <button onClick={handleWithdrawal}>retiro de 100</button>
       <button onClick={handleLogout}>logout</button>
     </div>
   );

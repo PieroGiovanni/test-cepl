@@ -7,3 +7,7 @@ export const getBalance = async (token) => {
 export const makeDeposit = async (token, data) => {
   return axios.post("/deposito", data, { headers: { authtoken: token } });
 };
+
+export const makeWithdrawal = async (token, data) => {
+  return axios.post("/retiro", data, { headers: { authtoken: token } });
+};

@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node --watch --env-file=.env src/index.js",
-    "start": "node --env-file=.env src/index.js"
+    "dev": "node --watch --env-file=.env index.js",
+    "start": "node --env-file=.env index.js"
   },
   "author": "Piero Aparcana",
   "license": "ISC",

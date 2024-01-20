@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs, addDoc } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 const {
   FIREBASE_API_KEY,
@@ -19,45 +20,6 @@ const firebaseConfig = {
   appId: FIREBASE_APP_ID,
 };
 
-const firebaseApp = initializeApp(firebaseConfig);
-const firebaseDb = getFirestore(firebaseApp);
-
-export const initializeFirebaseApp = () => {
-  try {
-    firebaseApp;
-    firebaseDb;
-    console.log("Firebase connected");
-    return firebaseApp;
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-export const getTestData = async () => {
-  try {
-    const docSnap = await getDocs(collection(firebaseDb, "test-collection"));
-    const finalData = [];
-    docSnap.forEach((doc) => {
-      finalData.push(doc.data());
-    });
-
-    console.log(finalData);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-export const updateTestData = async () => {
-  try {
-    const docRef = await addDoc(collection(firebaseDb, "test-collection"), {
-      first: "Ada",
-      last: "Lovelace",
-      born: 1815,
-    });
-    console.log("Document written with ID: ", docRef.id);
-  } catch (error) {
-    console.error("Error adding document: ", error);
-  }
-};
-
-export const getFirebaseApp = () => firebaseApp;
+export const firebaseApp = initializeApp(firebaseConfig);
+export const firebaseDb = getFirestore(firebaseApp);
+export const auth = getAuth(firebaseApp);

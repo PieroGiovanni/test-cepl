@@ -11,6 +11,7 @@ const main = async () => {
       origin: [
         "http://localhost:5173",
         "https://test-cepl-28409.firebaseapp.com",
+        "https://test-cepl-28409.web.app/",
       ],
     })
   );

@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { makeDeposit, makeWithdrawal, getBalance } from "./controllers.js";
+import {
+  makeDeposit,
+  makeWithdrawal,
+  getBalance,
+  getLastTransactions,
+} from "./controllers.js";
 import { isAuth } from "./middlewares/isAuth.middleware.js";
 
 const router = Router();
@@ -18,5 +23,7 @@ router.get("/ping", isAuth, (req, res) => {
     return res.status(500).send("errorasdfadsf");
   }
 });
+
+router.get("/ultimas-transacciones", isAuth, getLastTransactions);
 
 export default router;

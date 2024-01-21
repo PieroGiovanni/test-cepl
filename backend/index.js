@@ -8,11 +8,7 @@ const main = async () => {
   app.use(
     cors({
       credentials: true,
-      origin: [
-        "http://localhost:5173",
-        "https://test-cepl-28409.firebaseapp.com",
-        "https://test-cepl-28409.web.app/",
-      ],
+      origin: "*",
     })
   );
 

@@ -8,6 +8,6 @@ export const isAuth = async (req, res, next) => {
     }
     return next();
   } catch (error) {
-    return console.log(error);
+    return res.status(500).send({ message: "Token Inválido" });
   }
 };

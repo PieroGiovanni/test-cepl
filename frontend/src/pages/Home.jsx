@@ -21,10 +21,15 @@ function Home() {
   const { logout, user } = useAuth();
 
   const fetchData = useCallback(async () => {
-    const balance = await getBalance(user.accessToken);
-    const lastTransactions = await getLastTransactions(user.accessToken);
-    setTransactions(lastTransactions.data);
-    setBalance(balance.data.balance);
+    try {
+      const balance = await getBalance(user.accessToken);
+      const lastTransactions = await getLastTransactions(user.accessToken);
+      setTransactions(lastTransactions.data);
+      setBalance(balance.data.balance);
+    } catch (error) {
+      setToastMessage(error.response.data.message);
+      setShowToast(true);
+    }
     setLoading(false);
   }, [user.accessToken]);
 
@@ -38,11 +43,15 @@ function Home() {
 
   const handleDeposit = async () => {
     setLoading(true);
-    const res = await makeDeposit(user.accessToken, {
-      quantity: Number(depositInput),
-    });
+    try {
+      const res = await makeDeposit(user.accessToken, {
+        quantity: Number(depositInput),
+      });
+      setToastMessage(res.data.message);
+    } catch (error) {
+      setToastMessage(error.response.data.message);
+    }
     setDepositInput(0);
-    setToastMessage(res.data.message);
     setShowToast(true);
     setTimeout(() => {
       setShowToast(false);
@@ -52,11 +61,15 @@ function Home() {
 
   const handleWithdrawal = async () => {
     setLoading(true);
-    const res = await makeWithdrawal(user.accessToken, {
-      quantity: Number(withdrawalInput),
-    });
+    try {
+      const res = await makeWithdrawal(user.accessToken, {
+        quantity: Number(withdrawalInput),
+      });
+      setToastMessage(res.data.message);
+    } catch (error) {
+      setToastMessage(error.response.data.message);
+    }
     setWithdrawalInput(0);
-    setToastMessage(res.data.message);
     setShowToast(true);
     setTimeout(() => {
       setShowToast(false);
@@ -84,6 +97,7 @@ function Home() {
           DEPOSITAR
         </Button>
         <input
+          min={0}
           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-20 text-center p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           type="number"
           onChange={(e) => setDepositInput(e.target.value)}
@@ -92,6 +106,7 @@ function Home() {
       </div>
       <div className="flex items-center gap-4">
         <Button
+          min={0}
           disabled={withdrawalInput < 1}
           color="red"
           className="w-32"

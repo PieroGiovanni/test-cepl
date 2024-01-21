@@ -1,16 +1,27 @@
 import { Timestamp } from "firebase-admin/firestore";
 import { firebaseDb as db } from "./lib/firebase.js";
 import { formatTime } from "./lib/formatTime.js";
-
-export const userRef = db.collection("users-transactions");
+import { ValidationError } from "./lib/errors.js";
+import { quantityValidator } from "./lib/zodSchema.js";
 
 export const makeDeposit = async (req, res, next) => {
   const uid = req.uid;
 
-  const { quantity } = req.body;
   let balance = 0;
 
+  const { quantity } = req.body;
+
   try {
+    const result = quantityValidator.safeParse({ quantity });
+    if (!result.success)
+      return next(
+        new ValidationError(
+          "Transacción Inválida",
+          400,
+          result.error.format().quantity._errors
+        )
+      );
+
     const docSnap = await db.collection("users-transactions").doc(uid).get();
 
     if (docSnap.exists) {
@@ -39,7 +50,7 @@ export const makeDeposit = async (req, res, next) => {
       message: "Depósito exitoso",
     });
   } catch (error) {
-    return console.error("Error adding document: ", error);
+    next(error);
   }
 };
 
@@ -49,6 +60,17 @@ export const makeWithdrawal = async (req, res, next) => {
   let balance = 0;
 
   try {
+    const result = quantityValidator.safeParse({ quantity });
+
+    if (!result.success)
+      return next(
+        new ValidationError(
+          "Transacción Inválida",
+          400,
+          result.error.format().quantity._errors
+        )
+      );
+
     const docSnap = await db.collection("users-transactions").doc(uid).get();
 
     if (docSnap.exists) {
@@ -56,7 +78,7 @@ export const makeWithdrawal = async (req, res, next) => {
     }
 
     if (balance < quantity)
-      return res.status(500).json({ message: "Fondos insuficientes" });
+      return next(new ValidationError("Fondos insuficientes"));
 
     const newTransaction = await db
       .collection("users-transactions")
@@ -80,7 +102,7 @@ export const makeWithdrawal = async (req, res, next) => {
       message: "Retiro exitoso",
     });
   } catch (error) {
-    return console.error("Error adding document: ", error);
+    next(error);
   }
 };
 
@@ -94,23 +116,20 @@ export const getBalance = async (req, res, next) => {
     if (docSnap.exists) {
       balance = docSnap.data().balance;
     }
-    return res.json({ balance });
+    return res.status(200).json({ balance });
   } catch (error) {
-    return console.log(error);
+    return next(error);
   }
 };
 
 export const getLastTransactions = async (req, res, next) => {
   const uid = req.uid;
-  // const uid = "ALJRFe9q0IR6wXcBzyNO1zCjAXw1";
   try {
     const docSnap = await db
       .collection("users-transactions")
       .doc(uid)
       .collection("transactions")
       .get();
-
-    // console.log(formatTime(1705811000));
 
     const transactions = docSnap.docs
       .map((doc) => ({ id: doc.id, ...doc.data() }))
@@ -125,9 +144,8 @@ export const getLastTransactions = async (req, res, next) => {
       })
       .slice(0, 10);
 
-    // console.log(transactions);
     return res.status(200).send(transactions);
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };

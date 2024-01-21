@@ -15,15 +15,6 @@ router.post("/retiro", isAuth, makeWithdrawal);
 
 router.get("/saldo", isAuth, getBalance);
 
-router.get("/ping", isAuth, (req, res) => {
-  try {
-    console.log(req.headers.authtoken);
-    return res.send("pong");
-  } catch (error) {
-    return res.status(500).send("errorasdfadsf");
-  }
-});
-
 router.get("/ultimas-transacciones", isAuth, getLastTransactions);
 
 export default router;
